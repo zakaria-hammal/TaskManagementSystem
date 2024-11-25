@@ -59,3 +59,45 @@ int InsertTask(Task **L, char id[13], char description[1001], int priorityLevel,
     
     return 1;
 }
+
+int DeleteTask(Task **L, char id[13])
+{
+    if(L != NULL)
+    {
+        if(*L == NULL)
+        {
+            return 1;
+        }
+
+        Task *P;
+
+        if(!strcmp((*L)->Id, id))
+        {
+            P = *L;
+            *L = P->next;
+            free(P);
+
+            return 0;
+        }
+
+        Task *Q = *L;
+
+        while(Q->next != NULL && strcmp(Q->next->Id, id) != 0)
+        {
+            Q = Q->next;
+        }
+
+        if(Q->next == NULL)
+        {
+            return 1;
+        }
+
+        P = Q->next;
+        Q->next = P->next;
+        free(P);
+
+        return 0;
+    }
+
+    return 1;
+}
