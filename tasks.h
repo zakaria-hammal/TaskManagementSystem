@@ -1,14 +1,14 @@
 typedef struct Task Task;
 struct Task
 {
-    char Id[12];
-    char Description[1000];
+    char Id[13];
+    char Description[1001];
     int PriorityLevel;
     char Status[15];
     Task* next;
 };
 
-int InsertTask(Task **L, char id[12], char description[1000], int priorityLevel, char status[15])
+int InsertTask(Task **L, char id[13], char description[1001], int priorityLevel, char status[15])
 {
     if(L != NULL)
     {
@@ -20,7 +20,7 @@ int InsertTask(Task **L, char id[12], char description[1000], int priorityLevel,
 
         if (*L == NULL)
         {
-            P->next = NULL;
+            P->next;
             *L = P;
             return 0;
         }
@@ -29,10 +29,11 @@ int InsertTask(Task **L, char id[12], char description[1000], int priorityLevel,
 
         while(Q != NULL)
         {
-            if(P->Id == Q->Id)
+            if(!strcmp(P->Id, Q->Id))
             {
                 return 1;
             }
+            Q = Q->next;
         }
 
         Q = *L;
@@ -55,4 +56,6 @@ int InsertTask(Task **L, char id[12], char description[1000], int priorityLevel,
         return 0;
         
     }
+    
+    return 1;
 }
