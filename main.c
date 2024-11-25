@@ -64,10 +64,15 @@ static void Insert(GtkWidget *widget, gpointer user_data)
     if(InsertTask(&L, id, description, choice, status))
     {
         gtk_label_set_label(GTK_LABEL(label1[5]), "Task Id Already exists !!!");
+        gtk_widget_add_css_class(GTK_WIDGET(label1[5]), "exist");
+        gtk_widget_remove_css_class(GTK_WIDGET(label1[5]), "correct");
+        
     }
     else
     {
         gtk_label_set_label(GTK_LABEL(label1[5]), "Task added successfully");
+        gtk_widget_add_css_class(GTK_WIDGET(label1[5]), "correct");
+        gtk_widget_remove_css_class(GTK_WIDGET(label1[5]), "exist");
     }
     
 }
@@ -101,11 +106,11 @@ static void on_activate(GtkApplication *app)
     gtk_grid_set_row_homogeneous(GTK_GRID(grid[0]), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid[0]), TRUE);
 
-    button[0] = gtk_button_new_with_label("Insert a Task");
-    button[1] = gtk_button_new_with_label("Delete a Task");
-    button[2] = gtk_button_new_with_label("Update a Task Status");
-    button[3] = gtk_button_new_with_label("Display Tasks");
-    button[4] = gtk_button_new_with_label("Search by Priority");
+    button[0] = gtk_button_new_with_mnemonic("Insert a Task");
+    button[1] = gtk_button_new_with_mnemonic("Delete a Task");
+    button[2] = gtk_button_new_with_mnemonic("Update a Task Status");
+    button[3] = gtk_button_new_with_mnemonic("Display Tasks");
+    button[4] = gtk_button_new_with_mnemonic("Search by Priority");
 
     label[0] = gtk_label_new (NULL);
     label[1] = gtk_label_new (NULL);
@@ -113,8 +118,12 @@ static void on_activate(GtkApplication *app)
     label[3] = gtk_label_new (NULL);
 
     GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_string(provider, "button { font-size: 20px; font-weight: normal; border-radius: 10px;} button:hover { font-size: 25px; font-weight: bold;} label {font-size: 25px; font-weight: bold; border-radius: 5px;} entry {font-size: 15px; font-weight: bold; border-radius: 10px;} ");
-
+    gtk_css_provider_load_from_string(provider, 
+                                        "button { font-size: 20px; font-weight: normal; border-radius: 10px;} "
+                                        "button:hover { font-size: 25px; font-weight: bold;} "
+                                        ".bold-label, entry {font-size: 25px; font-weight: bold; border-radius: 10px;}"
+                                        ".exist {color: red;}"
+                                        ".correct {color: green;}");
     GdkDisplay *display = gdk_display_get_default();
     gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
@@ -131,7 +140,7 @@ static void on_activate(GtkApplication *app)
 
     g_signal_connect (button[0], "clicked", G_CALLBACK(GoToInsert), NULL);
 
-    retour = gtk_button_new_with_label("Retour");
+    retour = gtk_button_new_with_mnemonic("Retour");
     g_signal_connect (retour, "clicked", G_CALLBACK(Home), NULL);
 
     grid[1] = gtk_grid_new();
@@ -152,7 +161,7 @@ static void on_activate(GtkApplication *app)
 
     dropdown[1] = gtk_drop_down_new_from_strings(items2);
 
-    submit[0] = gtk_button_new_with_label("Submit");
+    submit[0] = gtk_button_new_with_mnemonic("Submit");
     g_signal_connect (submit[0], "clicked", G_CALLBACK(Insert), NULL);
 
     gtk_grid_set_column_spacing(GTK_GRID(grid[1]), 10);
@@ -168,6 +177,13 @@ static void on_activate(GtkApplication *app)
     label1[4] = gtk_label_new("");
     label1[5] = gtk_label_new("");
     label1[6] = gtk_label_new("");
+    gtk_widget_add_css_class(GTK_WIDGET(label1[0]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label1[1]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label1[2]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label1[3]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label1[4]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label1[5]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label1[6]), "bold-label");
 
     gtk_label_set_label(GTK_LABEL(label1[1]), "Identifier (maximum 12 caracters):");
     gtk_label_set_xalign(GTK_LABEL(label1[1]), 0.0);
