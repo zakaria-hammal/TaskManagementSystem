@@ -10,14 +10,51 @@ GtkWidget *button[5];
 GtkWidget *grid[6];
 GtkWidget *retour[5];
 GtkWidget *stack;
-GtkEntryBuffer *buffer[3];
-GtkWidget *entry[3];
+GtkEntryBuffer *buffer[4];
+GtkWidget *entry[4];
 GtkWidget *submit[5];
-GtkWidget *dropdown[2];
+GtkWidget *dropdown[3];
 GtkWidget *label1[7];
-GtkWidget *label2[6];
+GtkWidget *label2[4];
+GtkWidget *label3[5];
 
 Task* L;
+
+static void Update(GtkWidget *widget, gpointer user_data)
+{
+    char *string_id = g_strdup(gtk_entry_buffer_get_text(buffer[3]));
+    char id[13];
+    
+    strcpy(id, string_id);
+
+    GtkStringObject *selected_item = gtk_drop_down_get_selected_item(GTK_DROP_DOWN(dropdown[2]));
+    
+    const char* selected_text = gtk_string_object_get_string(selected_item);
+    char status[15];
+    strcpy(status, selected_text);
+
+    if(UpdateTaskStatus(&L, id, status))
+    {
+        gtk_label_set_label(GTK_LABEL(label3[3]), "Task Id does not exists !!!");
+        gtk_widget_add_css_class(GTK_WIDGET(label3[3]), "exist");
+        gtk_widget_remove_css_class(GTK_WIDGET(label3[3]), "correct");
+    }
+    else
+    {
+        gtk_label_set_label(GTK_LABEL(label3[3]), "Task Status Updated successfully");
+        gtk_widget_add_css_class(GTK_WIDGET(label3[3]), "correct");
+        gtk_widget_remove_css_class(GTK_WIDGET(label3[3]), "exist");
+    }
+
+    Task *Q = L;
+
+    while(Q != NULL)
+    {
+        g_print("%s\n", Q->Status);
+        Q = Q->next;
+    }
+
+}
 
 static void Delete(GtkWidget *widget, gpointer user_data)
 {
@@ -79,7 +116,11 @@ static void Insert(GtkWidget *widget, gpointer user_data)
         gtk_widget_add_css_class(GTK_WIDGET(label1[5]), "correct");
         gtk_widget_remove_css_class(GTK_WIDGET(label1[5]), "exist");
     }
-    
+}
+
+static void GoToUpdate(GtkWidget *widget, gpointer user_data)
+{
+    gtk_stack_set_visible_child_name(GTK_STACK(stack), "grid_update");
 }
 
 static void GoToDelete(GtkWidget *widget, gpointer user_data)
@@ -98,8 +139,13 @@ static void Home(GtkWidget *widget, gpointer user_data)
     gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffer[0]), "", 0);
     gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffer[1]), "", 0);
     gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffer[2]), "", 0);
+    gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffer[3]), "", 0);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown[0]), 0);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown[1]), 0);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown[2]), 0);
     gtk_label_set_label(GTK_LABEL(label1[5]), "");
     gtk_label_set_label(GTK_LABEL(label2[2]), "");
+    gtk_label_set_label(GTK_LABEL(label3[3]), "");
 }
 
 static void on_activate(GtkApplication *app) 
@@ -167,7 +213,7 @@ static void on_activate(GtkApplication *app)
     entry[0] = gtk_entry_new_with_buffer(buffer[0]);
 
     buffer[1] = gtk_entry_buffer_new(NULL, -1);
-    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER(buffer[1]), 12);
+    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER(buffer[1]), 1000);
 
     entry[1] = gtk_entry_new_with_buffer(buffer[1]);
 
@@ -179,7 +225,7 @@ static void on_activate(GtkApplication *app)
 
     dropdown[1] = gtk_drop_down_new_from_strings(items2);
 
-    submit[0] = gtk_button_new_with_mnemonic("Submit");
+    submit[0] = gtk_button_new_with_mnemonic("Add");
     g_signal_connect (submit[0], "clicked", G_CALLBACK(Insert), NULL);
 
     gtk_grid_set_column_spacing(GTK_GRID(grid[1]), 10);
@@ -238,15 +284,11 @@ static void on_activate(GtkApplication *app)
     label2[1] = gtk_label_new("");
     label2[2] = gtk_label_new("");
     label2[3] = gtk_label_new("");
-    label2[4] = gtk_label_new("");
-    label2[5] = gtk_label_new("");
 
     gtk_widget_add_css_class(GTK_WIDGET(label2[0]), "bold-label");
     gtk_widget_add_css_class(GTK_WIDGET(label2[1]), "bold-label");
     gtk_widget_add_css_class(GTK_WIDGET(label2[2]), "bold-label");
     gtk_widget_add_css_class(GTK_WIDGET(label2[3]), "bold-label");
-    gtk_widget_add_css_class(GTK_WIDGET(label2[4]), "bold-label");
-    gtk_widget_add_css_class(GTK_WIDGET(label2[5]), "bold-label");
 
     gtk_label_set_label(GTK_LABEL(label2[1]), "Identifier (maximum 12 caracters):");
     gtk_label_set_xalign(GTK_LABEL(label2[1]), 0.0);
@@ -270,9 +312,58 @@ static void on_activate(GtkApplication *app)
     g_signal_connect (submit[1], "clicked", G_CALLBACK(Delete), NULL);
     g_signal_connect (retour[1], "clicked", G_CALLBACK(Home), NULL);
 
+    grid[3] = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(grid[3]), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid[3]), 10);
+
+    gtk_grid_set_row_homogeneous(GTK_GRID(grid[3]), TRUE);
+    gtk_grid_set_column_homogeneous(GTK_GRID(grid[3]), TRUE);
+    g_signal_connect (button[2], "clicked", G_CALLBACK(GoToUpdate), NULL);
+
+    buffer[3] = gtk_entry_buffer_new(NULL, -1);
+    gtk_entry_buffer_set_max_length(GTK_ENTRY_BUFFER(buffer[3]), 11);
+
+    entry[3] = gtk_entry_new_with_buffer(buffer[3]);
+
+    submit[2] = gtk_button_new_with_mnemonic("Update Status");
+    g_signal_connect (submit[2], "clicked", G_CALLBACK(Update), NULL);
+    retour[2] = gtk_button_new_with_mnemonic("Retour");
+    g_signal_connect (retour[2], "clicked", G_CALLBACK(Home), NULL);
+
+    const char *items3[] = {"Pending", "In Progress", "Completed", NULL};
+
+    dropdown[2] = gtk_drop_down_new_from_strings(items3);
+
+    label3[0] = gtk_label_new("");
+    label3[1] = gtk_label_new("");
+    label3[2] = gtk_label_new("");
+    label3[3] = gtk_label_new("");
+    label3[4] = gtk_label_new("");
+    gtk_widget_add_css_class(GTK_WIDGET(label3[0]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label3[1]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label3[2]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label3[3]), "bold-label");
+    gtk_widget_add_css_class(GTK_WIDGET(label3[4]), "bold-label");
+
+    gtk_label_set_label(GTK_LABEL(label3[1]), "Identifier (maximum 12 caracters):");
+    gtk_label_set_xalign(GTK_LABEL(label3[1]), 0.0);
+    gtk_label_set_label(GTK_LABEL(label3[2]), "New Status :");
+    gtk_label_set_xalign(GTK_LABEL(label3[2]), 0.0);
+
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(label3[0]), 0, 0, 12, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(label3[1]), 1, 1, 10, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(entry[3]), 1, 2, 3, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(label3[2]), 1, 3, 10, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(dropdown[2]), 1, 4, 10, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(label3[3]), 1, 5, 10, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(submit[2]), 1, 6, 5, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(retour[2]), 6, 6, 5, 1);
+    gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(label3[4]), 0, 7, 12, 1);
+
     gtk_stack_add_titled(GTK_STACK(stack), grid[0], "grid_home", "Home");
     gtk_stack_add_titled(GTK_STACK(stack), grid[1], "grid_insert", "Insert");
     gtk_stack_add_titled(GTK_STACK(stack), grid[2], "grid_delete", "Delete");
+    gtk_stack_add_titled(GTK_STACK(stack), grid[3], "grid_update", "Update");
 
     gtk_window_present(GTK_WINDOW(window));
 }

@@ -101,3 +101,33 @@ int DeleteTask(Task **L, char id[13])
 
     return 1;
 }
+
+int UpdateTaskStatus(Task **L, char id[13], char status[15])
+{
+    if(L != NULL)
+    {
+        if(*L == NULL)
+        {
+            return 1;
+        }
+
+        Task *Q = *L;
+
+        while (Q != NULL && strcmp(Q->Id, id) != 0)
+        {
+            Q = Q->next;
+        }
+        
+
+        if(Q == NULL)
+        {
+            return 1;
+        }
+
+        strcpy(Q->Status, status);
+
+        return 0;
+    }
+
+    return 1;
+}
