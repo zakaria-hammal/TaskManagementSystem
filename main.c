@@ -44,7 +44,7 @@ static void on_activate(GtkApplication *app)
     gtk_grid_set_row_homogeneous(GTK_GRID(grid[0]), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(grid[0]), TRUE);
 
-    button[0] = gtk_button_new_with_label("Insert a Task");
+    button[0] = gtk_button_new_with_label("Insert a Task");#
     button[1] = gtk_button_new_with_label("Delete a Task");
     button[2] = gtk_button_new_with_label("Update a Task Status");
     button[3] = gtk_button_new_with_label("Display Tasks");
