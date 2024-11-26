@@ -131,3 +131,63 @@ int UpdateTaskStatus(Task **L, char id[13], char status[15])
 
     return 1;
 }
+
+void BuildList(Task **L, Task **L1, Task **L2, Task **L3)
+{
+    if(L1 != NULL && L2 != NULL && L3 != NULL && L != NULL)
+    {
+        
+        *L1 = NULL;
+        *L2 = NULL;
+        *L3 = NULL;
+    
+        if(*L != NULL)
+        {
+            Task *Q = *L;
+            Task *P;
+
+            while(Q != NULL)
+            {
+                P = malloc(sizeof(Task));
+                P->PriorityLevel = Q->PriorityLevel;
+                strcmp(P->Description, Q->Description);
+                strcmp(P->Status, Q->Status);
+                strcmp(P->Id, Q->Id);
+                if (!strcmp(Q->Status, "Pending"))
+                {
+                    P->next = *L1;
+                    *L1 = P;
+                }
+                else if (!strcmp(Q->Status, "In Progress"))
+                {
+                    P->next = *L2;
+                    *L2 = P;
+                }
+                else
+                {
+                    P->next = *L3;
+                    *L3 = P;
+                }
+
+                Q = Q->next;
+                
+            }
+        }
+        
+    }
+}
+
+void DestroyList(Task **L)
+{
+    if(L != NULL)
+    {
+        Task *Q;
+        while (*L != NULL)
+        {
+            Q = *L;
+            *L = (*L)->next;
+            free(Q);
+        }
+        
+    }
+}
