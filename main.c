@@ -23,6 +23,9 @@ GtkWidget **inProgressLabel;
 GtkWidget **completedLabel;
 GtkWidget *box;
 int size[3];
+GtkWidget *spaceLabel1;
+GtkWidget **spaceLabel2;
+
 
 Task *L;
 Task *L1;
@@ -139,7 +142,7 @@ static void GoToDisplay(GtkWidget * widget, gpointer user_data)
     BuildList(&L, &L1, &L2, &L3);
 
     Task *P;
-    char stat[15] = "";
+    char stat[11002] = "";
     char *valid_utf8;
 
     size[0] = 0;
@@ -148,8 +151,11 @@ static void GoToDisplay(GtkWidget * widget, gpointer user_data)
 
     label4 = malloc(3 * sizeof(GtkWidget*));
     label4[0] = gtk_label_new_with_mnemonic("Pending");
+    gtk_widget_add_css_class(GTK_WIDGET(label4[0]), "title-label");
     label4[1] = gtk_label_new_with_mnemonic("In Progress");
+    gtk_widget_add_css_class(GTK_WIDGET(label4[1]), "title-label");
     label4[2] = gtk_label_new_with_mnemonic("Completed");
+    gtk_widget_add_css_class(GTK_WIDGET(label4[2]), "title-label");
 
     P = L1;
     while (P != NULL)
@@ -175,15 +181,26 @@ static void GoToDisplay(GtkWidget * widget, gpointer user_data)
     pendingLabel = malloc(size[0] * sizeof(GtkWidget*));
     inProgressLabel = malloc(size[1] * sizeof(GtkWidget*));
     completedLabel = malloc(size[2] * sizeof(GtkWidget*));
+    spaceLabel2 = malloc(sizeof(GtkWidget*));
+    *spaceLabel2 = gtk_label_new_with_mnemonic("\n");
+    char pr[3];
 
     gtk_box_append(GTK_BOX(box), GTK_WIDGET(label4[0]));
+
     P = L1;
     for (int i = 0; i < size[0]; i++)
     {
         g_print("%s\n", P->Id);
         strcpy(stat, "Id : ");
         strcat(stat, P->Id);
+        strcat(stat, "\nDescription : ");
+        strcat(stat, P->Description);
+        strcat(stat, "\nPriority Level : ");
+        sprintf(pr, "%d", P->PriorityLevel);
+        strcat(stat, pr);
         pendingLabel[i] = gtk_label_new_with_mnemonic(stat);
+        gtk_widget_add_css_class(GTK_WIDGET(pendingLabel[i]), "bold-label");
+        gtk_label_set_xalign(GTK_LABEL(pendingLabel[i]), 0.0);
         gtk_box_append(GTK_BOX(box), GTK_WIDGET(pendingLabel[i]));
         P = P->next;
     }
@@ -195,7 +212,14 @@ static void GoToDisplay(GtkWidget * widget, gpointer user_data)
         g_print("%s\n", P->Id);
         strcpy(stat, "Id : ");
         strcat(stat, P->Id);
+        strcat(stat, "\nDescription : ");
+        strcat(stat, P->Description);
+        strcat(stat, "\nPriority Level : ");
+        sprintf(pr, "%d", P->PriorityLevel);
+        strcat(stat, pr);
         inProgressLabel[i] = gtk_label_new_with_mnemonic(stat);
+        gtk_widget_add_css_class(GTK_WIDGET(inProgressLabel[i]), "bold-label");
+        gtk_label_set_xalign(GTK_LABEL(inProgressLabel[i]), 0.0);
         gtk_box_append(GTK_BOX(box), GTK_WIDGET(inProgressLabel[i]));
         P = P->next;
     }
@@ -207,10 +231,20 @@ static void GoToDisplay(GtkWidget * widget, gpointer user_data)
         g_print("%s\n", P->Id);
         strcpy(stat, "Id : ");
         strcat(stat, P->Id);
+        strcat(stat, "\nDescription : ");
+        strcat(stat, P->Description);
+        strcat(stat, "\nPriority Level : ");
+        sprintf(pr, "%d", P->PriorityLevel);
+        strcat(stat, pr);
         completedLabel[i] = gtk_label_new_with_mnemonic(stat);
+        gtk_widget_add_css_class(GTK_WIDGET(completedLabel[i]), "bold-label");
+        gtk_label_set_xalign(GTK_LABEL(completedLabel[i]), 0.0);
         gtk_box_append(GTK_BOX(box), GTK_WIDGET(completedLabel[i]));
         P = P->next;
     }
+
+
+    gtk_box_append(GTK_BOX(box), GTK_WIDGET(*spaceLabel2));
 }
 
 static void GoToUpdate(GtkWidget *widget, gpointer user_data)
@@ -284,6 +318,13 @@ static void Home(GtkWidget *widget, gpointer user_data)
         completedLabel = NULL;
     }
 
+    if(spaceLabel2 != NULL)
+    {
+        gtk_box_remove(GTK_BOX(box), GTK_WIDGET(*spaceLabel2));
+        free(spaceLabel2);
+        spaceLabel2 = NULL;
+    }
+
     DestroyList(&L1);
     DestroyList(&L2);
     DestroyList(&L3);
@@ -335,7 +376,8 @@ static void on_activate(GtkApplication *app)
                                         ".bold-label { font-size: 25px; font-weight: bold;}"
                                         "entry { min-height: 50px; font-size: 20px; font-weight: 600; padding: 10px; border-radius: 10px;}"
                                         ".exist { color: red;}"
-                                        ".correct { color: green;}");
+                                        ".correct { color: green;}"
+                                        ".title-label { color: blue;font-size: 25px; font-weight: bold;}");
     GdkDisplay *display = gdk_display_get_default();
     gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
@@ -531,11 +573,24 @@ static void on_activate(GtkApplication *app)
     gtk_label_set_label(GTK_LABEL(label2[2]), "");
     gtk_label_set_label(GTK_LABEL(label3[3]), "");
 
+    
+    spaceLabel1 = gtk_label_new_with_mnemonic("\n");
+
+    gtk_box_append(GTK_BOX(box), GTK_WIDGET(spaceLabel1));
+
+    GtkWidget *scrolled_window = gtk_scrolled_window_new();
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), 
+                                   GTK_POLICY_NEVER,
+                                   GTK_POLICY_AUTOMATIC
+    );
+
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), box);
+
     gtk_stack_add_titled(GTK_STACK(stack), grid[0], "grid_home", "Home");
     gtk_stack_add_titled(GTK_STACK(stack), grid[1], "grid_insert", "Insert");
     gtk_stack_add_titled(GTK_STACK(stack), grid[2], "grid_delete", "Delete");
     gtk_stack_add_titled(GTK_STACK(stack), grid[3], "grid_update", "Update");
-    gtk_stack_add_titled(GTK_STACK(stack), box, "grid_display", "Display");
+    gtk_stack_add_titled(GTK_STACK(stack), scrolled_window, "grid_display", "Display");
 
     gtk_window_present(GTK_WINDOW(window));
 }
@@ -552,6 +607,7 @@ int main(int argc, char* argv[])
     inProgressLabel = NULL;
     completedLabel = NULL;
     label4 = NULL;
+    spaceLabel2 = NULL;
 
     app = gtk_application_new ("stackof.holger.entry", G_APPLICATION_DEFAULT_FLAGS);
 
