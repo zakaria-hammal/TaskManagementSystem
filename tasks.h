@@ -182,3 +182,34 @@ void DestroyList(Task **L)
         
     }
 }
+
+void BuildSingleList(Task **L, Task **L1, int priorityLevel)
+{
+    if(L != NULL)
+    {
+        *L1 = NULL;
+        if(priorityLevel >= 1 && priorityLevel <= 5)
+        {
+            Task *Q = *L;
+            Task *P;
+
+            while (Q != NULL)
+            {
+                if(Q->PriorityLevel == priorityLevel)
+                {
+                    P = malloc(sizeof(Task));
+                    P->PriorityLevel = Q->PriorityLevel;
+                    strcpy(P->Description, Q->Description);
+                    strcpy(P->Status, Q->Status);
+                    strcpy(P->Id, Q->Id);
+                    P->next = *L1;
+                    *L1 = P;
+                }
+                
+                Q = Q->next;
+            }
+            
+        }
+        
+    }
+}

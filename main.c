@@ -12,25 +12,109 @@ GtkWidget *retour[5];
 GtkWidget *stack;
 GtkEntryBuffer *buffer[4];
 GtkWidget *entry[4];
-GtkWidget *submit[5];
-GtkWidget *dropdown[3];
+GtkWidget *submit[4];
+GtkWidget *dropdown[4];
 GtkWidget *label1[7];
 GtkWidget *label2[4];
 GtkWidget *label3[5];
+GtkWidget *scrolled_window1;
+GtkWidget *scrolled_window2;
 GtkWidget **label4;
 GtkWidget **pendingLabel;
 GtkWidget **inProgressLabel;
 GtkWidget **completedLabel;
 GtkWidget *box;
-int size[3];
+GtkWidget *box1;
+int size[4];
 GtkWidget *spaceLabel1;
 GtkWidget **spaceLabel2;
-
+GtkWidget *headLabel;
+GtkWidget *titleLabel;
+GtkWidget **infoLabel;
+GtkWidget **bottomLabel;
 
 Task *L;
 Task *L1;
 Task *L2;
 Task *L3;
+Task *L4;
+
+static void Search(GtkWidget *widget, gpointer user_data)
+{
+    if(infoLabel != NULL)
+    {
+        for (int i = 0; i < size[3]; i++)
+        {
+            gtk_box_remove(GTK_BOX(box1), GTK_WIDGET(infoLabel[i]));
+        }
+
+        free(infoLabel);
+        infoLabel = NULL;
+    }
+
+    if(bottomLabel != NULL)
+    {
+        gtk_box_remove(GTK_BOX(box1), GTK_WIDGET(*bottomLabel));
+        free(bottomLabel);
+        bottomLabel = NULL;
+    }
+
+    DestroyList(&L4);
+    L4 = NULL;
+
+    GtkStringObject *selected_item = gtk_drop_down_get_selected_item(GTK_DROP_DOWN(dropdown[3]));
+
+    int choice = atoi(gtk_string_object_get_string(selected_item));
+    BuildSingleList(&L, &L4, choice);
+
+    if(L4 == NULL)
+    {
+        size[3] = 1;
+        infoLabel = malloc(sizeof(GtkWidget*));
+        bottomLabel = malloc(sizeof(GtkWidget*));
+        *bottomLabel = gtk_label_new_with_mnemonic("\n");
+        *infoLabel = gtk_label_new_with_mnemonic("No Task Found");
+        gtk_widget_add_css_class(GTK_WIDGET(*infoLabel), "bold-label");
+        gtk_label_set_xalign(GTK_LABEL(*infoLabel), 0.0);
+        gtk_box_append(GTK_BOX(box1), GTK_WIDGET(*infoLabel));
+        gtk_box_append(GTK_BOX(box1), GTK_WIDGET(*bottomLabel));
+        g_print("Zero\n");
+        return;
+    }
+
+    Task *P = L4;
+    size[3] = 0;
+
+    while(P != NULL)
+    {
+        size[3] += 1;
+        P = P->next;
+    }
+
+    infoLabel = malloc(size[3] * sizeof(GtkWidget*));
+    bottomLabel = malloc(sizeof(GtkWidget*));
+    *bottomLabel = gtk_label_new_with_mnemonic("\n");
+    char stat[11002] = "";
+
+    P = L4;
+    for (int i = 0; i < size[3]; i++)
+    {
+        g_print("%s\n", P->Id);
+        strcpy(stat, "Id : ");
+        strcat(stat, P->Id);
+        strcat(stat, "\nDescription : ");
+        strcat(stat, P->Description);
+        strcat(stat, "\nStatus : ");
+        strcat(stat, P->Status);
+        infoLabel[i] = gtk_label_new_with_mnemonic(stat);
+        gtk_widget_add_css_class(GTK_WIDGET(infoLabel[i]), "bold-label");
+        gtk_label_set_xalign(GTK_LABEL(infoLabel[i]), 0.0);
+        gtk_box_append(GTK_BOX(box1), GTK_WIDGET(infoLabel[i]));
+        P = P->next;
+    }
+
+    gtk_box_append(GTK_BOX(box1), GTK_WIDGET(*bottomLabel));
+}
 
 static void Update(GtkWidget *widget, gpointer user_data)
 {
@@ -136,14 +220,18 @@ static void Insert(GtkWidget *widget, gpointer user_data)
     g_free(description);
 }
 
-static void GoToDisplay(GtkWidget * widget, gpointer user_data)
+static void GoToSearch(GtkWidget *widget, gpointer user_data)
+{
+    gtk_stack_set_visible_child_name(GTK_STACK(stack), "grid_search");
+}
+
+static void GoToDisplay(GtkWidget *widget, gpointer user_data)
 {
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "grid_display");
     BuildList(&L, &L1, &L2, &L3);
 
     Task *P;
     char stat[11002] = "";
-    char *valid_utf8;
 
     size[0] = 0;
     size[1] = 0;
@@ -325,18 +413,33 @@ static void Home(GtkWidget *widget, gpointer user_data)
         spaceLabel2 = NULL;
     }
 
+    if(infoLabel != NULL)
+    {
+        for (int i = 0; i < size[3]; i++)
+        {
+            gtk_box_remove(GTK_BOX(box1), GTK_WIDGET(infoLabel[i]));
+        }
+
+        free(infoLabel);
+        infoLabel = NULL;
+    }
+
+    if(bottomLabel != NULL)
+    {
+        gtk_box_remove(GTK_BOX(box1), GTK_WIDGET(*bottomLabel));
+        free(bottomLabel);
+        bottomLabel = NULL;
+    }
+
     DestroyList(&L1);
     DestroyList(&L2);
     DestroyList(&L3);
-
-    pendingLabel = NULL;
-    inProgressLabel = NULL;
-    completedLabel = NULL;
-    label4 = NULL;
+    DestroyList(&L4);
     
     L1 = NULL;
     L2 = NULL;
     L3 = NULL;
+    L4 = NULL;
 }
 
 static void on_activate(GtkApplication *app) 
@@ -552,12 +655,12 @@ static void on_activate(GtkApplication *app)
     gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(retour[2]), 6, 6, 5, 1);
     gtk_grid_attach(GTK_GRID(grid[3]), GTK_WIDGET(label3[4]), 0, 7, 12, 1);
 
-    box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
     g_signal_connect(button[3], "clicked", G_CALLBACK(GoToDisplay), NULL);
 
-    retour[3] = gtk_button_new_with_mnemonic("Retour");
+    retour[3] = gtk_button_new_with_mnemonic("Return");
     g_signal_connect (retour[3], "clicked", G_CALLBACK(Home), NULL);
 
     gtk_box_append(GTK_BOX(box), GTK_WIDGET(retour[3]));
@@ -573,24 +676,55 @@ static void on_activate(GtkApplication *app)
     gtk_label_set_label(GTK_LABEL(label2[2]), "");
     gtk_label_set_label(GTK_LABEL(label3[3]), "");
 
-    
     spaceLabel1 = gtk_label_new_with_mnemonic("\n");
 
     gtk_box_append(GTK_BOX(box), GTK_WIDGET(spaceLabel1));
 
-    GtkWidget *scrolled_window = gtk_scrolled_window_new();
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), 
+    scrolled_window1 = gtk_scrolled_window_new();
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window1), 
                                    GTK_POLICY_NEVER,
                                    GTK_POLICY_AUTOMATIC
     );
 
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window), box);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window1), box);
+
+    box1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
+    gtk_widget_set_halign(box1, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(box1, GTK_ALIGN_CENTER);
+
+    scrolled_window2 = gtk_scrolled_window_new();
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window2), 
+                                   GTK_POLICY_NEVER,
+                                   GTK_POLICY_AUTOMATIC
+    );
+
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled_window2), box1);
+
+    g_signal_connect(button[4], "clicked", G_CALLBACK(GoToSearch), NULL);
+    retour[4] = gtk_button_new_with_mnemonic("Return");
+    g_signal_connect (retour[4], "clicked", G_CALLBACK(Home), NULL);
+    gtk_box_append(GTK_BOX(box1), GTK_WIDGET(retour[4]));
+
+    headLabel = gtk_label_new_with_mnemonic("\n");
+    titleLabel = gtk_label_new_with_mnemonic("Priority Level :");
+
+    const char *items4[] = {"1", "2", "3", "4", "5", NULL};
+    dropdown[3] = gtk_drop_down_new_from_strings(items1);
+
+    submit[3] = gtk_button_new_with_label("Search");
+    g_signal_connect(submit[3], "clicked", G_CALLBACK(Search), NULL);
+
+    gtk_box_append(GTK_BOX(box1), GTK_WIDGET(headLabel));
+    gtk_box_append(GTK_BOX(box1), GTK_WIDGET(titleLabel));
+    gtk_box_append(GTK_BOX(box1), GTK_WIDGET(dropdown[3]));    
+    gtk_box_append(GTK_BOX(box1), GTK_WIDGET(submit[3]));    
 
     gtk_stack_add_titled(GTK_STACK(stack), grid[0], "grid_home", "Home");
     gtk_stack_add_titled(GTK_STACK(stack), grid[1], "grid_insert", "Insert");
     gtk_stack_add_titled(GTK_STACK(stack), grid[2], "grid_delete", "Delete");
     gtk_stack_add_titled(GTK_STACK(stack), grid[3], "grid_update", "Update");
-    gtk_stack_add_titled(GTK_STACK(stack), scrolled_window, "grid_display", "Display");
+    gtk_stack_add_titled(GTK_STACK(stack), scrolled_window1, "grid_display", "Display");
+    gtk_stack_add_titled(GTK_STACK(stack), scrolled_window2, "grid_search", "Search");
 
     gtk_window_present(GTK_WINDOW(window));
 }
@@ -603,6 +737,7 @@ int main(int argc, char* argv[])
     L1 = NULL;
     L2 = NULL;
     L3 = NULL;
+    L4 = NULL;
     pendingLabel = NULL;
     inProgressLabel = NULL;
     completedLabel = NULL;
