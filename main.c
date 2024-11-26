@@ -17,8 +17,12 @@ GtkWidget *dropdown[3];
 GtkWidget *label1[7];
 GtkWidget *label2[4];
 GtkWidget *label3[5];
-GtkWidget *label4[3];
+GtkWidget **label4;
+GtkWidget **pendingLabel;
+GtkWidget **inProgressLabel;
+GtkWidget **completedLabel;
 GtkWidget *box;
+int size[3];
 
 Task *L;
 Task *L1;
@@ -59,6 +63,7 @@ static void Update(GtkWidget *widget, gpointer user_data)
         Q = Q->next;
     }
 
+    g_free(string_id);
 }
 
 static void Delete(GtkWidget *widget, gpointer user_data)
@@ -80,6 +85,8 @@ static void Delete(GtkWidget *widget, gpointer user_data)
         gtk_widget_add_css_class(GTK_WIDGET(label2[2]), "correct");
         gtk_widget_remove_css_class(GTK_WIDGET(label2[2]), "exist");
     }
+
+    g_free(string_id);
 }
 
 static void Insert(GtkWidget *widget, gpointer user_data)
@@ -121,6 +128,9 @@ static void Insert(GtkWidget *widget, gpointer user_data)
         gtk_widget_add_css_class(GTK_WIDGET(label1[5]), "correct");
         gtk_widget_remove_css_class(GTK_WIDGET(label1[5]), "exist");
     }
+
+    g_free(string_id);
+    g_free(description);
 }
 
 static void GoToDisplay(GtkWidget * widget, gpointer user_data)
@@ -130,31 +140,75 @@ static void GoToDisplay(GtkWidget * widget, gpointer user_data)
 
     Task *P;
     char stat[15] = "";
+    char *valid_utf8;
+
+    size[0] = 0;
+    size[1] = 0;
+    size[2] = 0;
+
+    label4 = malloc(3 * sizeof(GtkWidget*));
+    label4[0] = gtk_label_new_with_mnemonic("Pending");
+    label4[1] = gtk_label_new_with_mnemonic("In Progress");
+    label4[2] = gtk_label_new_with_mnemonic("Completed");
 
     P = L1;
     while (P != NULL)
     {
-        strcpy(stat, "Id : ");
-        strcat(stat, P->Id);
-        gtk_box_append(GTK_BOX(box), GTK_WIDGET(gtk_label_new(stat)));
+        size[0] += 1;
         P = P->next;
     }
 
     P = L2;
     while (P != NULL)
     {
-        strcpy(stat, "Id : ");
-        strcat(stat, P->Id);
-        gtk_box_append(GTK_BOX(box), GTK_WIDGET(gtk_label_new(stat)));
+        size[1] += 1;
         P = P->next;
     }
 
     P = L3;
     while (P != NULL)
     {
+        size[2] += 1;
+        P = P->next;
+    }
+
+    pendingLabel = malloc(size[0] * sizeof(GtkWidget*));
+    inProgressLabel = malloc(size[1] * sizeof(GtkWidget*));
+    completedLabel = malloc(size[2] * sizeof(GtkWidget*));
+
+    gtk_box_append(GTK_BOX(box), GTK_WIDGET(label4[0]));
+    P = L1;
+    for (int i = 0; i < size[0]; i++)
+    {
+        g_print("%s\n", P->Id);
         strcpy(stat, "Id : ");
         strcat(stat, P->Id);
-        gtk_box_append(GTK_BOX(box), GTK_WIDGET(gtk_label_new(stat)));
+        pendingLabel[i] = gtk_label_new_with_mnemonic(stat);
+        gtk_box_append(GTK_BOX(box), GTK_WIDGET(pendingLabel[i]));
+        P = P->next;
+    }
+
+    gtk_box_append(GTK_BOX(box), GTK_WIDGET(label4[1]));
+    P = L2;
+    for (int i = 0; i < size[1]; i++)
+    {
+        g_print("%s\n", P->Id);
+        strcpy(stat, "Id : ");
+        strcat(stat, P->Id);
+        inProgressLabel[i] = gtk_label_new_with_mnemonic(stat);
+        gtk_box_append(GTK_BOX(box), GTK_WIDGET(inProgressLabel[i]));
+        P = P->next;
+    }
+
+    gtk_box_append(GTK_BOX(box), GTK_WIDGET(label4[2]));
+    P = L3;
+    for (int i = 0; i < size[2]; i++)
+    {
+        g_print("%s\n", P->Id);
+        strcpy(stat, "Id : ");
+        strcat(stat, P->Id);
+        completedLabel[i] = gtk_label_new_with_mnemonic(stat);
+        gtk_box_append(GTK_BOX(box), GTK_WIDGET(completedLabel[i]));
         P = P->next;
     }
 }
@@ -187,9 +241,61 @@ static void Home(GtkWidget *widget, gpointer user_data)
     gtk_label_set_label(GTK_LABEL(label1[5]), "");
     gtk_label_set_label(GTK_LABEL(label2[2]), "");
     gtk_label_set_label(GTK_LABEL(label3[3]), "");
+
+    if(label4 != NULL)
+    {
+        gtk_box_remove(GTK_BOX(box), GTK_WIDGET(label4[0]));
+        gtk_box_remove(GTK_BOX(box), GTK_WIDGET(label4[1]));
+        gtk_box_remove(GTK_BOX(box), GTK_WIDGET(label4[2]));
+
+        free(label4);
+    }
+
+    if(pendingLabel != NULL)
+    {
+        for (int i = 0; i < size[0]; i++)
+        {
+            gtk_box_remove(GTK_BOX(box), GTK_WIDGET(pendingLabel[i]));
+        }
+
+        free(pendingLabel);
+        pendingLabel = NULL;
+    }
+
+    if(inProgressLabel != NULL)
+    {
+        for (int i = 0; i < size[1]; i++)
+        {
+            gtk_box_remove(GTK_BOX(box), GTK_WIDGET(inProgressLabel[i]));
+        }
+
+        free(inProgressLabel);
+        inProgressLabel = NULL;
+    }
+
+    if(completedLabel != NULL)
+    {
+        for (int i = 0; i < size[2]; i++)
+        {
+            gtk_box_remove(GTK_BOX(box), GTK_WIDGET(completedLabel[i]));
+        }
+
+        free(completedLabel);
+        completedLabel = NULL;
+    }
+
     DestroyList(&L1);
     DestroyList(&L2);
     DestroyList(&L3);
+
+    pendingLabel = NULL;
+    inProgressLabel = NULL;
+    completedLabel = NULL;
+    label4 = NULL;
+    
+    L1 = NULL;
+    L2 = NULL;
+    L3 = NULL;
 }
 
 static void on_activate(GtkApplication *app) 
@@ -413,15 +519,6 @@ static void on_activate(GtkApplication *app)
     g_signal_connect (retour[3], "clicked", G_CALLBACK(Home), NULL);
 
     gtk_box_append(GTK_BOX(box), GTK_WIDGET(retour[3]));
-    label4[0] = gtk_label_new("Pending");
-    label4[1] = gtk_label_new("In Progress");
-    label4[2] = gtk_label_new("Completed");
-
-    gtk_box_append(GTK_BOX(box), GTK_WIDGET(label4[0]));
-    
-    gtk_box_append(GTK_BOX(box), GTK_WIDGET(label4[1]));
-
-    gtk_box_append(GTK_BOX(box), GTK_WIDGET(label4[2]));
 
     gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffer[0]), "", 0);
     gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(buffer[1]), "", 0);
@@ -448,6 +545,13 @@ int main(int argc, char* argv[])
     GtkApplication *app;
     int status;
     L = NULL;
+    L1 = NULL;
+    L2 = NULL;
+    L3 = NULL;
+    pendingLabel = NULL;
+    inProgressLabel = NULL;
+    completedLabel = NULL;
+    label4 = NULL;
 
     app = gtk_application_new ("stackof.holger.entry", G_APPLICATION_DEFAULT_FLAGS);
 

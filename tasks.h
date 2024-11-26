@@ -10,55 +10,46 @@ struct Task
 
 int InsertTask(Task **L, char id[13], char description[1001], int priorityLevel, char status[15])
 {
-    if(L != NULL)
-    {
-        Task *P = malloc(sizeof(Task));
-        strcpy(P->Id, id);
-        P->PriorityLevel = priorityLevel;
-        strcpy(P->Description, description);
-        strcpy(P->Status, status);
-
-        if (*L == NULL)
-        {
-            P->next;
-            *L = P;
-            return 0;
-        }
-
-        Task *Q = *L;
-
-        while(Q != NULL)
-        {
-            if(!strcmp(P->Id, Q->Id))
-            {
-                return 1;
-            }
-            Q = Q->next;
-        }
-
-        Q = *L;
-        
-        if((*L)->PriorityLevel < priorityLevel)
-        {
-            P->next = *L;
-            *L = P;
-            return 0;
-        }
-
-        while (Q->next != NULL && Q->next->PriorityLevel > priorityLevel)
-        {
-            Q = Q->next;
-        }
-        
-        P->next = Q->next;
-        Q->next = P;
-
-        return 0;
-        
+    if (L == NULL) {
+        return 1;
     }
-    
-    return 1;
+
+    Task *Q = *L;
+    while (Q != NULL) {
+        if (!strcmp(Q->Id, id)) {
+            return 1;
+        }
+        Q = Q->next;
+    }
+
+    Task *P = malloc(sizeof(Task));
+    if (P == NULL) {
+        perror("Memory allocation failed");
+        return 1;
+    }
+
+    strcpy(P->Id, id);
+    strcpy(P->Description, description);
+    strcpy(P->Status, status);
+    P->PriorityLevel = priorityLevel;
+    P->next = NULL;
+
+    if (*L == NULL || (*L)->PriorityLevel < priorityLevel) {
+        P->next = *L;
+        *L = P;
+        return 0;
+    }
+
+    Q = *L;
+    while (Q->next != NULL && Q->next->PriorityLevel >= priorityLevel) {
+        Q = Q->next;
+    }
+
+    P->next = Q->next;
+    Q->next = P;
+    return 0;
 }
+
 
 int DeleteTask(Task **L, char id[13])
 {
@@ -74,7 +65,7 @@ int DeleteTask(Task **L, char id[13])
         if(!strcmp((*L)->Id, id))
         {
             P = *L;
-            *L = P->next;
+            *L = (*L)->next;
             free(P);
 
             return 0;
@@ -150,9 +141,9 @@ void BuildList(Task **L, Task **L1, Task **L2, Task **L3)
             {
                 P = malloc(sizeof(Task));
                 P->PriorityLevel = Q->PriorityLevel;
-                strcmp(P->Description, Q->Description);
-                strcmp(P->Status, Q->Status);
-                strcmp(P->Id, Q->Id);
+                strcpy(P->Description, Q->Description);
+                strcpy(P->Status, Q->Status);
+                strcpy(P->Id, Q->Id);
                 if (!strcmp(Q->Status, "Pending"))
                 {
                     P->next = *L1;
