@@ -430,6 +430,24 @@ static void Home(GtkWidget *widget, gpointer user_data)
         free(bottomLabel);
         bottomLabel = NULL;
     }
+    
+    if(infoLabel != NULL)
+    {
+        for (int i = 0; i < size[3]; i++)
+        {
+            gtk_box_remove(GTK_BOX(box1), GTK_WIDGET(infoLabel[i]));
+        }
+
+        free(infoLabel);
+        infoLabel = NULL;
+    }
+
+    if(bottomLabel != NULL)
+    {
+        gtk_box_remove(GTK_BOX(box1), GTK_WIDGET(*bottomLabel));
+        free(bottomLabel);
+        bottomLabel = NULL;
+    }
 
     DestroyList(&L1);
     DestroyList(&L2);
