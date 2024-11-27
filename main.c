@@ -360,6 +360,7 @@ static void Home(GtkWidget *widget, gpointer user_data)
     gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown[0]), 0);
     gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown[1]), 0);
     gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown[2]), 0);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown[3]), 0);    
     gtk_label_set_label(GTK_LABEL(label1[5]), "");
     gtk_label_set_label(GTK_LABEL(label2[2]), "");
     gtk_label_set_label(GTK_LABEL(label3[3]), "");
@@ -371,6 +372,7 @@ static void Home(GtkWidget *widget, gpointer user_data)
         gtk_box_remove(GTK_BOX(box), GTK_WIDGET(label4[2]));
 
         free(label4);
+        label4 = NULL;
     }
 
     if(pendingLabel != NULL)
