@@ -727,6 +727,7 @@ static void on_activate(GtkApplication *app)
 
     headLabel = gtk_label_new_with_mnemonic("\n");
     titleLabel = gtk_label_new_with_mnemonic("Priority Level :");
+    gtk_widget_add_css_class(GTK_WIDGET(titleLabel), "bold-label");
 
     const char *items4[] = {"1", "2", "3", "4", "5", NULL};
     dropdown[3] = gtk_drop_down_new_from_strings(items1);
