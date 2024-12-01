@@ -517,7 +517,7 @@ static void on_activate(GtkApplication *app)
 
     g_signal_connect (button[0], "clicked", G_CALLBACK(GoToInsert), NULL);
 
-    retour[0] = gtk_button_new_with_mnemonic("Retour");
+    retour[0] = gtk_button_new_with_mnemonic("Return");
     g_signal_connect (retour[0], "clicked", G_CALLBACK(Home), NULL);
 
     grid[1] = gtk_grid_new();
@@ -539,7 +539,7 @@ static void on_activate(GtkApplication *app)
     const char *items2[] = {"Pending", "In Progress", "Completed", NULL};
 
     dropdown[1] = gtk_drop_down_new_from_strings(items2);
-
+ 
     submit[0] = gtk_button_new_with_mnemonic("Add");
     g_signal_connect (submit[0], "clicked", G_CALLBACK(Insert), NULL);
 
@@ -614,7 +614,7 @@ static void on_activate(GtkApplication *app)
     entry[2] = gtk_entry_new_with_buffer(buffer[2]);
 
     submit[1] = gtk_button_new_with_mnemonic("Delete");
-    retour[1] = gtk_button_new_with_mnemonic("Retour");
+    retour[1] = gtk_button_new_with_mnemonic("Return");
 
     gtk_grid_attach(GTK_GRID(grid[2]), GTK_WIDGET(label2[0]), 0, 0, 12, 2);
     gtk_grid_attach(GTK_GRID(grid[2]), GTK_WIDGET(label2[1]), 1, 2, 10, 1);
@@ -642,7 +642,7 @@ static void on_activate(GtkApplication *app)
 
     submit[2] = gtk_button_new_with_mnemonic("Update Status");
     g_signal_connect (submit[2], "clicked", G_CALLBACK(Update), NULL);
-    retour[2] = gtk_button_new_with_mnemonic("Retour");
+    retour[2] = gtk_button_new_with_mnemonic("Return");
     g_signal_connect (retour[2], "clicked", G_CALLBACK(Home), NULL);
 
     const char *items3[] = {"Pending", "In Progress", "Completed", NULL};
