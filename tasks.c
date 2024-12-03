@@ -245,6 +245,35 @@ Task *L2;
 Task *L3;
 Task *L4;
 
+FILE *file;
+
+static void on_app_shutdown(GApplication *app, gpointer user_data) 
+{
+    DestroyList(&L1);
+    DestroyList(&L2);
+    DestroyList(&L3);
+    DestroyList(&L4);
+
+    Task *task;
+    FileTask *fileTask;
+
+    file = fopen("tasks.dat", "wb");
+
+    while(L != NULL)
+    {
+        task = L;
+        strcpy(fileTask->Id, task->Id);
+        strcpy(fileTask->Description, task->Description);
+        strcpy(fileTask->Status, task->Status);
+        fileTask->PriorityLevel = task->PriorityLevel;
+        L = L->next;
+        fwrite(fileTask, sizeof(FileTask), 1, file);
+        free(task);
+    }
+
+    fclose(file);
+}
+
 static void Search(GtkWidget *widget, gpointer user_data)
 {
     if(infoLabel != NULL)
@@ -971,9 +1000,34 @@ int main(int argc, char* argv[])
     label4 = NULL;
     spaceLabel2 = NULL;
 
+    file = fopen("tasks.dat", "rb");
+
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    FileTask fileTask;
+    Task *T;
+    
+    while (fread(&fileTask, sizeof(FileTask), 1, file) == 1)
+    {
+        T = malloc(sizeof(Task));
+        strcpy(T->Id, fileTask.Id);
+        strcpy(T->Description, fileTask.Description);
+        strcpy(T->Status, fileTask.Status);
+        T->PriorityLevel = fileTask.PriorityLevel;
+        T->next = L;
+        L = T;
+    }
+
+    fclose(file);
+    
     app = gtk_application_new ("stackof.holger.entry", G_APPLICATION_DEFAULT_FLAGS);
 
     g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL);
+    g_signal_connect(app, "shutdown", G_CALLBACK(on_app_shutdown), NULL);
+
     status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);
 
