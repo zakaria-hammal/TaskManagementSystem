@@ -473,11 +473,11 @@ static void GoToDisplay(GtkWidget *widget, gpointer user_data)
     size[2] = 0;
 
     label4 = malloc(3 * sizeof(GtkWidget*));
-    label4[0] = gtk_label_new_with_mnemonic("Pending");
+    label4[0] = gtk_label_new_with_mnemonic("\nPending");
     gtk_widget_add_css_class(GTK_WIDGET(label4[0]), "title-label");
-    label4[1] = gtk_label_new_with_mnemonic("In Progress");
+    label4[1] = gtk_label_new_with_mnemonic("\nIn Progress");
     gtk_widget_add_css_class(GTK_WIDGET(label4[1]), "title-label");
-    label4[2] = gtk_label_new_with_mnemonic("Completed");
+    label4[2] = gtk_label_new_with_mnemonic("\nCompleted");
     gtk_widget_add_css_class(GTK_WIDGET(label4[2]), "title-label");
 
     P = L1;
