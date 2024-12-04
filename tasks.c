@@ -255,7 +255,7 @@ static void on_app_shutdown(GApplication *app, gpointer user_data)
     DestroyList(&L4);
 
     Task *task;
-    FileTask *fileTask;
+    FileTask *fileTask = malloc(sizeof(FileTask));
 
     file = fopen("tasks.dat", "wb");
 
@@ -271,6 +271,7 @@ static void on_app_shutdown(GApplication *app, gpointer user_data)
         free(task);
     }
 
+    free(fileTask);
     fclose(file);
 }
 
@@ -473,7 +474,7 @@ static void GoToDisplay(GtkWidget *widget, gpointer user_data)
     size[2] = 0;
 
     label4 = malloc(3 * sizeof(GtkWidget*));
-    label4[0] = gtk_label_new_with_mnemonic("\nPending");
+    label4[0] = gtk_label_new_with_mnemonic("Pending");
     gtk_widget_add_css_class(GTK_WIDGET(label4[0]), "title-label");
     label4[1] = gtk_label_new_with_mnemonic("\nIn Progress");
     gtk_widget_add_css_class(GTK_WIDGET(label4[1]), "title-label");
