@@ -1,6 +1,7 @@
 # GTK4 C Program
 
 A Simple Task Mangement Program (ToDo List) for school project created in C using GTK4 for the graphical user interface (GUI).
+
 ---
 
 ## Prerequisites
